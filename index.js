@@ -4,6 +4,11 @@ import cors from 'cors';
 import connectDB from './database/db.js';
 import cookieParser from 'cookie-parser';
 import userRoute from './routes/user.route.js';
+import productRouter from './routes/product.router.js';
+import scrapeOnlyRouter from "./routes/scrape-only.router.js";
+
+
+
 
 dotenv.config({ quiet: true });
 
@@ -24,6 +29,10 @@ app.use(cors({
 
 // apis
 app.use("/api/v1/user", userRoute);
+app.use("/product", productRouter);
+app.use("/api/products", productRouter);
+app.use("/scrape-only", scrapeOnlyRouter);
+
 
 app.get("/home", (_,res) => {
     res.status(200).json({

@@ -29,9 +29,9 @@ app.use(cors({
 
 // apis
 app.use("/api/v1/user", userRoute);
-app.use("/product", productRouter);
-app.use("/api/products", productRouter);
+app.use("/api/v1/products", productRouter);
 app.use("/scrape-only", scrapeOnlyRouter);
+// app.use("/product", productRouter);
 
 
 app.get("/home", (_,res) => {

@@ -2,40 +2,52 @@ import { scrapeAmazonProduct } from "../lib/scraper/scraper.js";
 import {
   getAveragePrice,
   getHighestPrice,
-  getLowestPrice
+  getLowestPrice,
 } from "../lib/helpers.js";
 
-export async function scrapeProductOnly(req, res) {
+/**
+ * Controller: Scrape product details from Amazon without saving to DB
+ * @param {Request} req
+ * @param {Response} res
+ */
+export async function scrapeProductController(req, res) {
   const { url } = req.body;
 
   if (!url) {
-    return res.status(400).json({ success: false, msg: "URL missing" });
+    return res
+      .status(400)
+      .json({ success: false, msg: "Product URL is required" });
   }
 
   try {
-    const scraped = await scrapeAmazonProduct(url);
+    // Scrape the product
+    const scrapedProduct = await scrapeAmazonProduct(url);
 
-    if (!scraped) {
-      return res.status(500).json({ success: false, msg: "Scraping failed" });
+    if (!scrapedProduct) {
+      return res
+        .status(500)
+        .json({ success: false, msg: "Failed to scrape product" });
     }
 
+    // Prepare price history (current price only)
     const priceHistory = [
-      { prices: Number(scraped.currentPrice), date: new Date() }
+      { price: Number(scrapedProduct.currentPrice), date: new Date() },
     ];
 
-    return res.json({
-      success: true,
-      product: {
-        ...scraped,
-        priceHistory,
-        lowestPrice: getLowestPrice(priceHistory),
-        highestPrice: getHighestPrice(priceHistory),
-        averagePrice: getAveragePrice(priceHistory)
-      }
-    });
+    // Build response with calculated prices
+    const productData = {
+      ...scrapedProduct,
+      priceHistory,
+      lowestPrice: getLowestPrice(priceHistory),
+      highestPrice: getHighestPrice(priceHistory),
+      averagePrice: getAveragePrice(priceHistory),
+    };
 
+    return res.status(200).json({ success: true, product: productData });
   } catch (err) {
-    console.log("Scrape Controller Error:", err);
-    return res.status(500).json({ success: false, msg: "Server Error" });
+    console.error("Scrape Product Controller Error:", err.message);
+    return res
+      .status(500)
+      .json({ success: false, msg: "Server error occurred" });
   }
 }

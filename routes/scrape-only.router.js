@@ -1,5 +1,5 @@
 import express from "express";
-import { scrapeProductOnly } from "../controllers/scrape.controller.js";
+import { scrapeProductOnly } from "../lib/actions/scrapeProductOnly.js";
 
 const router = express.Router();
 

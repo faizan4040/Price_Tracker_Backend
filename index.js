@@ -12,25 +12,30 @@ dotenv.config();
 
 const app = express();
 
-/* ---------- DB CONNECTION (SAFE) ---------- */
+/* ---------- SAFE DB CONNECTION (SERVERLESS) ---------- */
 let cached = global.mongoose;
+
 if (!cached) {
-  cached = global.mongoose = { conn: null, promise: null };
+  cached = global.mongoose = {
+    conn: null,
+    promise: null,
+  };
 }
 
 async function dbConnect() {
   if (cached.conn) return cached.conn;
 
   if (!cached.promise) {
-    cached.promise = connectDB().then((mongoose) => mongoose);
+    cached.promise = connectDB();
   }
 
   cached.conn = await cached.promise;
   return cached.conn;
 }
 
+// IMPORTANT: connect DB before handling requests
 await dbConnect();
-/* ------------------------------------------ */
+/* ---------------------------------------------------- */
 
 app.use(express.json());
 app.use(cookieParser());
@@ -49,12 +54,12 @@ app.use(
 app.use("/api/v1/user", userRoute);
 app.use("/api/v1/products", productRouter);
 
-app.get("/", (_, res) => {
+app.get("/", (req, res) => {
   res.json({
     success: true,
     message: "Price History Tracker API running",
   });
 });
 
-/* ---------- EXPORT FOR VERCEL ---------- */
+/* ---------- EXPORT HANDLER (NO LISTEN) ---------- */
 export const handler = serverless(app);

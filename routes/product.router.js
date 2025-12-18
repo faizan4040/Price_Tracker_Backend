@@ -1,8 +1,14 @@
 import express from "express";
 
 import { createProduct, deleteProduct, getAllProducts, getProductById } from "../controllers/product.Controller.js";
+import { scrapeProductOnly } from "../lib/actions/scrapeProductOnly.js";
 
 const router = express.Router();
+
+// HERO SECTION: Scrape Only (NO SAVE)
+router.post("/scrape-only", scrapeProductOnly);
+
+
 
 // ---------------- CREATE OR UPDATE PRODUCT (SCRAPE + STORE) ----------------
 router.post("/scrape", createProduct);

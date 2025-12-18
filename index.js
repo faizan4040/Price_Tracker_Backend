@@ -1,46 +1,60 @@
-import express from 'express';
-import dotenv from 'dotenv';
-import cors from 'cors';
-import connectDB from './database/db.js';
-import cookieParser from 'cookie-parser';
-import userRoute from './routes/user.route.js';
-import productRouter from './routes/product.router.js';
-import scrapeOnlyRouter from "./routes/scrape-only.router.js";
+import express from "express";
+import dotenv from "dotenv";
+import cors from "cors";
+import cookieParser from "cookie-parser";
+import serverless from "serverless-http";
 
+import connectDB from "./database/db.js";
+import userRoute from "./routes/user.route.js";
+import productRouter from "./routes/product.router.js";
 
+dotenv.config();
 
-
-dotenv.config({ quiet: true });
-
-connectDB();
 const app = express();
 
-const PORT = process.env.PORT || 3000;
+/* ---------- DB CONNECTION (SAFE) ---------- */
+let cached = global.mongoose;
+if (!cached) {
+  cached = global.mongoose = { conn: null, promise: null };
+}
 
-// http://localhost:8080/api/v1/user/register
+async function dbConnect() {
+  if (cached.conn) return cached.conn;
+
+  if (!cached.promise) {
+    cached.promise = connectDB().then((mongoose) => mongoose);
+  }
+
+  cached.conn = await cached.promise;
+  return cached.conn;
+}
+
+await dbConnect();
+/* ------------------------------------------ */
 
 app.use(express.json());
 app.use(cookieParser());
 
-app.use(cors({
-    origin: "http://localhost:5173",
-    credentials: true
-}));
+app.use(
+  cors({
+    origin: [
+      "http://localhost:5173",
+      "https://price-tracker-frontend-eta.vercel.app",
+    ],
+    credentials: true,
+  })
+);
 
-// apis
+// Routes
 app.use("/api/v1/user", userRoute);
 app.use("/api/v1/products", productRouter);
-app.use("/scrape-only", scrapeOnlyRouter);
-// app.use("/product", productRouter);
 
-
-app.get("/home", (_,res) => {
-    res.status(200).json({
-        success: true,
-        message: "Welcome to Price History Tracker API"
-    })
-})
-
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+app.get("/", (_, res) => {
+  res.json({
+    success: true,
+    message: "Price History Tracker API running",
+  });
 });
+
+/* ---------- EXPORT FOR VERCEL ---------- */
+export const handler = serverless(app);

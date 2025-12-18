@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "start": "node index.js",
-    "dev": "nodemon index.js"
+    "dev": "nodemon index.js",
+    "postinstall": "npx playwright install chromium"
   },
   "keywords": [],
   "author": "",
@@ -20,9 +21,16 @@
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
+    "https-proxy-agent": "^7.0.6",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^9.0.0",
-    "multer": "^2.0.2"
+    "multer": "^2.0.2",
+    "playwright": "^1.57.0",
+    "playwright-extra": "^4.3.6",
+    "playwright-extra-plugin-stealth": "^0.0.1",
+    "puppeteer": "^24.33.0",
+    "puppeteer-extra-plugin-stealth": "^2.11.2",
+    "serverless-http": "^4.0.0"
   },
   "devDependencies": {
     "@types/node": "^24.10.1",

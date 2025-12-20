@@ -2,7 +2,6 @@ import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-import serverless from "serverless-http";
 
 import connectDB from "./database/db.js";
 import userRoute from "./routes/user.route.js";
@@ -12,30 +11,9 @@ dotenv.config();
 
 const app = express();
 
-/* ---------- SAFE DB CONNECTION (SERVERLESS) ---------- */
-let cached = global.mongoose;
-
-if (!cached) {
-  cached = global.mongoose = {
-    conn: null,
-    promise: null,
-  };
-}
-
-async function dbConnect() {
-  if (cached.conn) return cached.conn;
-
-  if (!cached.promise) {
-    cached.promise = connectDB();
-  }
-
-  cached.conn = await cached.promise;
-  return cached.conn;
-}
-
-// IMPORTANT: connect DB before handling requests
-await dbConnect();
-/* ---------------------------------------------------- */
+/* ---------- DB CONNECTION ---------- */
+await connectDB();
+/* ---------------------------------- */
 
 app.use(express.json());
 app.use(cookieParser());
@@ -61,12 +39,9 @@ app.get("/", (req, res) => {
   });
 });
 
-/* ---------- EXPORT HANDLER (NO LISTEN) ---------- */
-export const handler = serverless(app);
+// 🔴 THIS IS WHAT RENDER NEEDS
+const PORT = process.env.PORT || 3000;
 
-
-
-
-
-
-// updateed
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on port ${PORT}`);
+});

@@ -24,6 +24,7 @@ app.use(
     origin: [
       "http://localhost:5173",
       "https://price-tracker-frontend.vercel.app",
+      "https://price-tracker-frontend-git-main-faizan4040s-projects.vercel.app"
     ],
     credentials: true,
   })
